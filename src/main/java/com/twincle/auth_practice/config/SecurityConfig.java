@@ -1,5 +1,8 @@
 package com.twincle.auth_practice.config;
 
+import com.twincle.auth_practice.jwt.JwtFilter;
+import com.twincle.auth_practice.jwt.TokenProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -8,25 +11,30 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration // 스프링에게 이건 서버 켜질 때 제일 먼저 읽어야 하는 설정 파일임을 알려줌
-@EnableWebSecurity // 스프링 시큐리티 작동 시작
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final TokenProvider tokenProvider;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // JWT를 쓸 때는 보통 CSRF 방어 기능을 끕니다.
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // 스프링 시큐리티에게 /api/auth/ 로 시작하는 주소는 신분증 없이 일단 무조건 통과시키라고 명령 (로그인/가입 창구니까)
                         .requestMatchers("/api/auth/**").permitAll()
-                        // 그 외의 모든 주소는 무조건 JWT가 있는지 검사
                         .anyRequest().authenticated()
-                );
+                )
+                // JwtFilter 배치
+                // "스프링 시큐리티 기본 폼 로그인(UsernamePassword) 검사소보다 '앞에' 우리가 만든 JwtFilter를 세워라!"
+                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
-    // 비밀번호를 '1234' 그대로 두지 않고 암호화
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

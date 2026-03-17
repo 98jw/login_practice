@@ -60,4 +60,32 @@ public class TokenProvider {
                 .expiration(validity)
                 .compact();
     }
+
+    // ---------------------------------------------------------
+    // 3. 토큰에서 이메일 꺼내서 시큐리티에 넘겨주기
+    // ---------------------------------------------------------
+    public org.springframework.security.core.Authentication getAuthentication(String token) {
+        // 토큰을 해독해서(parse) Payload에 적힌 이메일(Subject)을 가져옵니다.
+        String email = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
+
+        // 스프링 시큐리티가 좋아하는 'User' 객체 형태로 예쁘게 포장합니다. (권한은 아직 없으니 텅 빈 리스트로!)
+        org.springframework.security.core.userdetails.User principal =
+                new org.springframework.security.core.userdetails.User(email, "", java.util.Collections.emptyList());
+
+        // 인증 성공 및 반환
+        return new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(principal, token, java.util.Collections.emptyList());
+    }
+
+    // ---------------------------------------------------------
+    // 4. 토큰이 진짜인지 검사하기
+    // ---------------------------------------------------------
+    public boolean validateToken(String token) {
+        try {
+            // 우리 비밀키로 진위 여부 판별
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false; // 가짜거나, 만료되었거나, 문제가 있는 토큰!
+        }
+    }
 }
