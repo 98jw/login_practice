@@ -47,7 +47,7 @@ Spring Boot와 Spring Security, 그리고 JWT(JSON Web Token)를 활용하여 **
 
 ---
 
-## 📁 전체 파일 구조 및 역할 요약
+## 전체 파일 구조 및 역할 요약
 
 ```text
 com.twincle.auth_practice
