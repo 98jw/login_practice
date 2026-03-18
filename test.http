@@ -42,11 +42,16 @@ Content-Type: application/json
   "password": "my_secret_password"
 }
 
+> {%
+    // 로그인이 성공하면, 응답받은 토큰들을 내 컴퓨터 임시 변수에 자동 저장!
+    client.global.set("my_access_token", response.body.accessToken);
+    client.global.set("my_refresh_token", response.body.refreshToken);
+%}
+
 ### 7. 내 정보 수정하기 (토큰 필수!)
 PATCH http://localhost:8080/api/user/me
 Content-Type: application/json
-# 발급받은 진짜 토큰을 Bearer 뒤에 붙여넣으세요!
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqZXdvb2tAdHdpbmNsZS5jb20iLCJ0ZW5hbnRJZCI6ImJkYWU0NzY5LTQzNGQtNDE0ZC1iNjA5LWJhNjY4OWViNGQwZCIsImV4cCI6MTc3Mzc5NjkxN30.0_JEXyl23GinNVghxRs03rgry6OE_fBrACwRfJKFrPE
+Authorization: Bearer {{my_access_token}}
 
 {
   "newName": "업데이트 된 제욱"
@@ -54,5 +59,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqZXdvb2tAdHdpbmNsZS5jb20iL
 
 ### 8. 회원 탈퇴하기 (토큰 필수!)
 DELETE http://localhost:8080/api/user/me
-# 발급받은 진짜 토큰을 Bearer 뒤에 붙여넣으세요!
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqZXdvb2tAdHdpbmNsZS5jb20iLCJ0ZW5hbnRJZCI6ImJkYWU0NzY5LTQzNGQtNDE0ZC1iNjA5LWJhNjY4OWViNGQwZCIsImV4cCI6MTc3Mzc5NjkxN30.0_JEXyl23GinNVghxRs03rgry6OE_fBrACwRfJKFrPE
+Authorization: Bearer {{my_access_token}}
+
+### 9. Access Token 만료 시, Refresh Token으로 재발급 받기!
+POST http://localhost:8080/api/auth/reissue
+Content-Type: application/json
+
+{
+  "refreshToken": "{{my_refresh_token}}"
+}

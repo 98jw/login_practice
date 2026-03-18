@@ -66,4 +66,9 @@ public class Tenant {
     public void updateTenantName(String newName) {
         this.tenantName = newName;
     }
+
+    // Refresh Token을 갱신하는 기능
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshTokenHash = refreshToken;
+    }
 }

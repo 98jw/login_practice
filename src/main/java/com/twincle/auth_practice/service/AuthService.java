@@ -40,7 +40,7 @@ public class AuthService {
     }
 
     // 2. 로그인 로직 (토큰 발급 로직 추가)
-    @Transactional(readOnly = true)
+    @Transactional
     public TokenDto login(String email, String password) {
 
         // ① 이메일 검사
@@ -55,6 +55,8 @@ public class AuthService {
         // ③ 검사 통과! 공장장에게 30분짜리 Access 토큰, 7일짜리 Refresh 토큰 만들어달라고 명령
         String accessToken = tokenProvider.createAccessToken(tenant.getLoginEmail(), tenant.getTenantId());
         String refreshToken = tokenProvider.createRefreshToken(tenant.getLoginEmail());
+
+        tenant.updateRefreshToken(refreshToken);    // Refresh Token을 DB에 저장
 
         // ④ 프론트엔드가 알아보기 쉽게 포장지(TokenDto)에 담아서 돌려주기
         return new TokenDto(accessToken, refreshToken);
@@ -94,9 +96,7 @@ public class AuthService {
         return "회원가입 성공! 환영합니다, " + tenantName + "님!";
     }
 
-    // ---------------------------------------------------------
     // 4. 회원 정보 수정
-    // ---------------------------------------------------------
     @Transactional
     public String updateTenantName(String email, String newName) {
         // ① 이메일로 사용자 찾기
@@ -109,9 +109,7 @@ public class AuthService {
         return "이름이 성공적으로 [" + newName + "](으)로 변경되었습니다!";
     }
 
-    // ---------------------------------------------------------
     // 5. 회원 탈퇴 (DB에서 삭제)
-    // ---------------------------------------------------------
     @Transactional
     public String deleteTenant(String email) {
         // ① 이메일로 사용자 찾기
@@ -122,5 +120,35 @@ public class AuthService {
         tenantRepository.delete(tenant);
 
         return "회원 탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.";
+    }
+
+    // 6. Refresh Token으로 새 토큰 세트 발급받기 (Reissue)
+    @Transactional
+    public TokenDto reissue(String refreshToken) {
+        // ① TokenProvider로 유효한지(기간은 안 지났는지) 검사!
+        if (!tokenProvider.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("Refresh Token이 유효하지 않거나 만료되었습니다. 다시 로그인해주세요.");
+        }
+
+        // ② 이름(이메일) 꺼내기
+        String email = tokenProvider.getAuthentication(refreshToken).getName();
+
+        // ③ DB에서 해당 사용자 찾기
+        Tenant tenant = tenantRepository.findByLoginEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // ④ [핵심 보안] 들고 온 토큰과 DB에 적힌 토큰이 똑같은지 대조! (탈취 방어)
+        if (!refreshToken.equals(tenant.getRefreshTokenHash())) {
+            throw new IllegalArgumentException("Refresh Token 정보가 일치하지 않습니다.");
+        }
+
+        // ⑤ 통과! 새로운 30분짜리 Access Token과 7일짜리 Refresh Token을 다시 찍어냅니다.
+        String newAccessToken = tokenProvider.createAccessToken(tenant.getLoginEmail(), tenant.getTenantId());
+        String newRefreshToken = tokenProvider.createRefreshToken(tenant.getLoginEmail());
+
+        // ⑥ 새로 발급한 Refresh Token을 DB에 업데이트해 줍니다. (이전 토큰은 이제 폐기!)
+        tenant.updateRefreshToken(newRefreshToken);
+
+        return new TokenDto(newAccessToken, newRefreshToken);
     }
 }

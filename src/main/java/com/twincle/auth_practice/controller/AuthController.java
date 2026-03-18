@@ -43,4 +43,17 @@ public class AuthController {
         private String password;
         private String tenantName;
     }
+
+    // 토큰 재발급 API (만료되었을 때 갱신용)
+    @PostMapping("/reissue")
+    public AuthService.TokenDto reissue(@RequestBody ReissueRequestDto request) {
+        // 받은 Refresh Token을 Service로 넘겨서 새 토큰 세트를 받아옵니다!
+        return authService.reissue(request.getRefreshToken());
+    }
+
+    // 재발급 요청 시 토큰을 담아올 DTO
+    @Getter
+    public static class ReissueRequestDto {
+        private String refreshToken;
+    }
 }
