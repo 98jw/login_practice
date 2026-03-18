@@ -61,4 +61,9 @@ public class Tenant {
     protected void onUpdate() {
         this.updatedAt = ZonedDateTime.now();
     }
+
+    // 이름(값)을 바꾸는 기능
+    public void updateTenantName(String newName) {
+        this.tenantName = newName;
+    }
 }

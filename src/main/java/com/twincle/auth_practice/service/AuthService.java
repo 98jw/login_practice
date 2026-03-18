@@ -93,4 +93,34 @@ public class AuthService {
         tenantRepository.save(newUser);
         return "회원가입 성공! 환영합니다, " + tenantName + "님!";
     }
+
+    // ---------------------------------------------------------
+    // 4. 회원 정보 수정
+    // ---------------------------------------------------------
+    @Transactional
+    public String updateTenantName(String email, String newName) {
+        // ① 이메일로 사용자 찾기
+        Tenant tenant = tenantRepository.findByLoginEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // ② 이름 바꾸기 (JPA가 DB에 UPDATE 쿼리를 날려줌)
+        tenant.updateTenantName(newName);
+
+        return "이름이 성공적으로 [" + newName + "](으)로 변경되었습니다!";
+    }
+
+    // ---------------------------------------------------------
+    // 5. 회원 탈퇴 (DB에서 삭제)
+    // ---------------------------------------------------------
+    @Transactional
+    public String deleteTenant(String email) {
+        // ① 이메일로 사용자 찾기
+        Tenant tenant = tenantRepository.findByLoginEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // ② Repository로 삭제 명령 내리기
+        tenantRepository.delete(tenant);
+
+        return "회원 탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.";
+    }
 }

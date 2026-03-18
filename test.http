@@ -41,3 +41,18 @@ Content-Type: application/json
   "email": "jewook@twincle.com",
   "password": "my_secret_password"
 }
+
+### 7. 내 정보 수정하기 (토큰 필수!)
+PATCH http://localhost:8080/api/user/me
+Content-Type: application/json
+# 발급받은 진짜 토큰을 Bearer 뒤에 붙여넣으세요!
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqZXdvb2tAdHdpbmNsZS5jb20iLCJ0ZW5hbnRJZCI6ImJkYWU0NzY5LTQzNGQtNDE0ZC1iNjA5LWJhNjY4OWViNGQwZCIsImV4cCI6MTc3Mzc5NjkxN30.0_JEXyl23GinNVghxRs03rgry6OE_fBrACwRfJKFrPE
+
+{
+  "newName": "업데이트 된 제욱"
+}
+
+### 8. 회원 탈퇴하기 (토큰 필수!)
+DELETE http://localhost:8080/api/user/me
+# 발급받은 진짜 토큰을 Bearer 뒤에 붙여넣으세요!
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqZXdvb2tAdHdpbmNsZS5jb20iLCJ0ZW5hbnRJZCI6ImJkYWU0NzY5LTQzNGQtNDE0ZC1iNjA5LWJhNjY4OWViNGQwZCIsImV4cCI6MTc3Mzc5NjkxN30.0_JEXyl23GinNVghxRs03rgry6OE_fBrACwRfJKFrPE
