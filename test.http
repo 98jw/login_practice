@@ -22,3 +22,22 @@ GET http://localhost:8080/api/user/me
 ### 4. 토큰 발급 받고 들어가기 (성공해야 정상!)
 GET http://localhost:8080/api/user/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0QHRlc3QuY29tIiwidGVuYW50SWQiOiI2ZGU3YWJiNi03OThjLTQ5NWYtYjIxNS1lMzBhMTljY2QyNGQiLCJleHAiOjE3NzM3OTQ0ODV9.ObyzGSQ3UQNv3sCnHK9U5h-AtGY-T0IZsnaXkWq5ssw
+
+### 5. 진짜 내 정보로 회원가입 해보기
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "jewook@twincle.com",
+  "password": "my_secret_password",
+  "tenantName": "진짜 제욱"
+}
+
+### 6. 방금 가입한 진짜 계정으로 로그인 해보기!
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jewook@twincle.com",
+  "password": "my_secret_password"
+}

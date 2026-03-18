@@ -29,4 +29,18 @@ public class AuthController {
         private String email;
         private String password;
     }
+
+    // 회원가입 API
+    @PostMapping("/signup")
+    public String signup(@RequestBody SignupRequestDto request) {
+        return authService.signup(request.getEmail(), request.getPassword(), request.getTenantName());
+    }
+
+    // 프론트엔드가 가입할 때 보낼 데이터를 담을 새로운 포장지(DTO)
+    @Getter
+    public static class SignupRequestDto {
+        private String email;
+        private String password;
+        private String tenantName;
+    }
 }

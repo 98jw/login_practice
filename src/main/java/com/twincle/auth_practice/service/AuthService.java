@@ -6,8 +6,11 @@ import com.twincle.auth_practice.repository.TenantRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +18,7 @@ public class AuthService {
 
     private final TenantRepository tenantRepository;
     private final TokenProvider tokenProvider; // 우리가 만든 TokenProvider 가져오기
+    private final PasswordEncoder passwordEncoder;
 
     // 1. 임시 테스트용 계정 만들기
     @Transactional
@@ -25,7 +29,7 @@ public class AuthService {
 
         Tenant dummyUser = Tenant.builder()
                 .tenantCode("TC_001")
-                .tenantName("제욱님의 테스트 기업")
+                .tenantName("테스트 아이디")
                 .loginEmail("test@test.com")
                 .passwordHash("1234")
                 .status("ACTIVE")
@@ -43,8 +47,8 @@ public class AuthService {
         Tenant tenant = tenantRepository.findByLoginEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
 
-        // ② 비밀번호 검사 (나중에 암호화 로직으로 바꿀 부분입니다!)
-        if (!tenant.getPasswordHash().equals(password)) {
+        // ② 비밀번호 검사 (입력받은 비밀번호와 DB의 해싱된 비밀번호를 비교!)
+        if (!passwordEncoder.matches(password, tenant.getPasswordHash())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
@@ -62,5 +66,31 @@ public class AuthService {
     public static class TokenDto {
         private String accessToken;
         private String refreshToken;
+    }
+
+    // 3. 회원가입 로직
+    @Transactional
+    public String signup(String email, String password, String tenantName) {
+        // ① 이메일 중복 검사 (이미 DB에 있으면 에러 표시)
+        if (tenantRepository.findByLoginEmail(email).isPresent()) {
+            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+        }
+
+        // ② 비밀번호 해싱 (1234 -> $2a$10$w...)
+        String encodedPassword = passwordEncoder.encode(password);
+
+        // ③ 새로운 사용자 정보 조립하기
+        Tenant newUser = Tenant.builder()
+                .tenantCode("TC_" + UUID.randomUUID().toString().substring(0, 5)) // 겹치지 않게 임시 코드 발급
+                .tenantName(tenantName)
+                .loginEmail(email)
+                .passwordHash(encodedPassword) // 해싱된 비밀번호를 DB에 넣음
+                .status("ACTIVE")
+                .refreshTokenHash("") // 처음 가입할 땐 빈 값으로 둡니다.
+                .build();
+
+        // ④ DB에 저장!
+        tenantRepository.save(newUser);
+        return "회원가입 성공! 환영합니다, " + tenantName + "님!";
     }
 }
