@@ -19,7 +19,7 @@ CREATE TABLE `tenants` (
 );
 ```
 
-Spring Boot와 Spring Security, 그리고 JWT(JSON Web Token)를 활용하여 **백엔드 사용자 인증 및 인가(Authentication & Authorization)의 전체 사이클을 처음부터 끝까지 직접 구현해 보았습니다.
+Spring Boot와 Spring Security, 그리고 JWT(JSON Web Token)를 활용하여 **백엔드 사용자 인증 및 인가(Authentication & Authorization)** 의 전체 사이클을 처음부터 끝까지 직접 구현해 보았습니다.
 
 단순한 로그인 기능 이외에도, 비밀번호 암호화, 토큰 재발급(RTR), 예외 처리, 그리고 프론트엔드와의 협업을 고려한 DTO 검증까지 실무에서 사용하는 핵심 보안 아키텍처를 적용했습니다.
 
