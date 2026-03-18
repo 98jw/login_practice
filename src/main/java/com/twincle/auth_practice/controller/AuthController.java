@@ -1,6 +1,10 @@
 package com.twincle.auth_practice.controller;
 
 import com.twincle.auth_practice.service.AuthService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -32,15 +36,23 @@ public class AuthController {
 
     // 회원가입 API
     @PostMapping("/signup")
-    public String signup(@RequestBody SignupRequestDto request) {
+    public String signup(@Valid @RequestBody SignupRequestDto request) {
         return authService.signup(request.getEmail(), request.getPassword(), request.getTenantName());
     }
 
     // 프론트엔드가 가입할 때 보낼 데이터를 담을 새로운 포장지(DTO)
     @Getter
     public static class SignupRequestDto {
+
+        @NotBlank(message = "이메일은 반드시 입력해야 합니다.")
+        @Email(message = "이메일 형식이 올바르지 않습니다. (예: test@test.com)")
         private String email;
+
+        @NotBlank(message = "비밀번호는 반드시 입력해야 합니다.")
+        @Size(min = 4, message = "비밀번호는 4글자 이상으로 설정해 주세요.")
         private String password;
+
+        @NotBlank(message = "기업 이름은 반드시 입력해야 합니다.")
         private String tenantName;
     }
 
