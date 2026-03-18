@@ -35,7 +35,7 @@ Spring Boot와 Spring Security, 그리고 JWT(JSON Web Token)를 활용하여 **
 3. **JWT 기반 로그인 및 토큰 발급 (Access & Refresh Token)**
    - `io.jsonwebtoken` 라이브러리를 활용한 토큰 생성 공장(`TokenProvider`) 구현
    - 서명(Signature)과 만료 시간(Expiration)이 포함된 안전한 토큰 발급
-4. **Spring Security 검문소 구축 (JwtFilter)**
+4. **Spring Security 구축 (JwtFilter)**
    - 모든 HTTP 요청의 헤더를 검사하여 토큰의 유효성을 돋보기처럼 확인하는 커스텀 필터 구현
    - 인증이 필요 없는 API(가입/로그인)와 인증이 필수인 VIP API(정보 수정/탈퇴)의 철저한 분리
 5. **토큰 재발급 자동화 (Refresh Token Rotation)**
